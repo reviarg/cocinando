@@ -14,6 +14,7 @@ remote URLs may fail. If running in a different environment, ensure that
 outbound connections are permitted.
 """
 
+import os
 import json
 import re
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -194,10 +195,17 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(data).encode("utf-8"))
 
 
-def run_server(host="localhost", port=8000):
+    def run_server():
     """Start the HTTP server."""
+    # Render sets the port number in the PORT environment variable
+    port = int(os.environ.get("PORT", "8000"))
+    host = "0.0.0.0"  # Bind to all interfaces so Render can reach it
     server = HTTPServer((host, port), RecipeRequestHandler)
     print(f"Starting recipe extraction server on {host}:{port}...")
+    server.serve_forever()
+
+    if __name__ == "__main__":
+    run_server()
     try:
         server.serve_forever()
     except KeyboardInterrupt:
