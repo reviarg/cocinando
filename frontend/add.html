@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe Organizer – Add Recipe</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="add">
+    <header>
+      <div class="header-content">
+        <h1><a href="home.html">Recipe Organizer</a></h1>
+        <nav class="nav-links">
+          <a href="add.html" class="active">Add Recipe</a>
+          <a href="view.html">View Recipes</a>
+        </nav>
+        <div class="user-info">
+          <span id="userDisplayName"></span>
+          <button id="logoutButton" class="logout">Log Out</button>
+        </div>
+      </div>
+    </header>
+    <main class="container">
+      <section>
+        <h2>Add New Recipe</h2>
+        <form id="recipeForm">
+          <div class="form-group">
+            <label for="recipe-url">Recipe URL</label>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+              <input type="url" id="recipe-url" name="url" placeholder="https://example.com/my-favourite-recipe" style="flex:1 1 auto;" required />
+              <button type="button" id="extractButton" class="btn btn-secondary" style="flex:0 0 auto;">Extract</button>
+            </div>
+            <small style="display:block; margin-top:0.25rem; font-size:0.75rem; color:#666;">Use the Extract button to automatically fill in the title, ingredients and steps from the URL.</small>
+          </div>
+          <div class="form-group">
+            <label for="recipe-title">Recipe Title</label>
+            <input type="text" id="recipe-title" name="title" placeholder="Chocolate Cake" required />
+          </div>
+          <div class="form-group">
+            <label for="recipe-ingredients">Ingredients (one per line)</label>
+            <textarea id="recipe-ingredients" name="ingredients" placeholder="e.g. 1 cup flour\n2 eggs\n1/2 cup sugar" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="recipe-steps">Steps (summary of instructions)</label>
+            <textarea id="recipe-steps" name="steps" placeholder="Summarize the cooking process here..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="recipe-tags">Tags (comma separated)</label>
+            <input type="text" id="recipe-tags" name="tags" placeholder="dessert, easy, chocolate" />
+          </div>
+          <div class="form-group">
+            <label for="recipe-image">Recipe Image (optional)</label>
+            <input type="file" id="recipe-image" name="image" accept="image/*" />
+          </div>
+          <button type="submit" class="btn">Add Recipe</button>
+        </form>
+      </section>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>
