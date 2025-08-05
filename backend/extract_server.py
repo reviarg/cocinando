@@ -105,9 +105,9 @@ def run_server():
     # Use PORT env var if present, default to 8000
     port = int(os.environ.get('PORT', '8000'))
     host = '0.0.0.0'
-    httpd = HTTPServer((host, port), RecipeRequestHandler)
+    server = HTTPServer((host, port), RecipeRequestHandler)
     print(f'Starting recipe extraction server on {host}:{port}...')
-    httpd.serve_forever()
+    server.serve_forever()
 
 
 if __name__ == '__main__':
