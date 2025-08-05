@@ -68,22 +68,58 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
             title_tag = soup.find('h1') or soup.find('title')
             if title_tag:
                 result['title'] = title_tag.get_text(strip=True)
-            # Ingredients extraction – look for common patterns
+            # Ingredients extraction – look for common patterns.  Many sites use
+            # ``ul``/``ol`` lists or ``div`` containers with ``ingredient`` in the
+            # class or id.  When gathering text, include a space separator to
+            # preserve spacing between quantity and ingredient name (e.g. "2 large
+            # eggs" instead of "2largeeggs").
             ingredients = []
-            for ul in soup.find_all(['ul', 'ol']):
-                text = ' '.join(ul.get('class', []))
-                if 'ingredient' in text.lower():
-                    for li in ul.find_all('li'):
-                        ingredients.append(li.get_text(strip=True))
+            # First, search within elements whose class or id mentions
+            # "ingredient" or "ingredients".  This catches recipes where the
+            # ingredients are wrapped in a container.
+            for container in soup.find_all(True, attrs={
+                'class': lambda x: x and 'ingredient' in ' '.join(x).lower(),
+                'id': lambda x: x and 'ingredient' in x.lower()
+            }):
+                for li in container.find_all(['li', 'p']):
+                    text = li.get_text(separator=' ', strip=True)
+                    if text:
+                        ingredients.append(text)
+            # If we didn't find ingredients in specific containers, fall back to
+            # any ``ul`` or ``ol`` that has "ingredient" in its class name.
+            if not ingredients:
+                for lst in soup.find_all(['ul', 'ol']):
+                    classes = ' '.join(lst.get('class', [])).lower()
+                    if 'ingredient' in classes:
+                        for li in lst.find_all('li'):
+                            text = li.get_text(separator=' ', strip=True)
+                            if text:
+                                ingredients.append(text)
             if ingredients:
                 result['ingredients'] = ingredients
-            # Steps extraction – look for instructions
+            # Steps extraction – look for containers with "instruction", "direction"
+            # or "step" in the class or id.  Use a space separator to preserve
+            # spacing within the instructions.  If none are found, fall back to
+            # ordered lists without class filtering.
             steps = []
-            for ol in soup.find_all('ol'):
-                text = ' '.join(ol.get('class', []))
-                if 'instruction' in text.lower() or 'step' in text.lower():
+            for container in soup.find_all(True, attrs={
+                'class': lambda x: x and any(k in ' '.join(x).lower() for k in ['instruction', 'direction', 'step']),
+                'id': lambda x: x and any(k in x.lower() for k in ['instruction', 'direction', 'step'])
+            }):
+                for li in container.find_all(['li', 'p']):
+                    text = li.get_text(separator=' ', strip=True)
+                    if text:
+                        steps.append(text)
+            # Fallback: if no steps found, include the first ordered list on the page
+            if not steps:
+                for ol in soup.find_all('ol'):
                     for li in ol.find_all('li'):
-                        steps.append(li.get_text(strip=True))
+                        text = li.get_text(separator=' ', strip=True)
+                        if text:
+                            steps.append(text)
+                    # Only take the first ``ol`` as a reasonable set of steps
+                    if steps:
+                        break
             if steps:
                 result['steps'] = steps
             # Links extraction
