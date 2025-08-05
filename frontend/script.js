@@ -206,7 +206,7 @@
       return;
     }
     // Determine backend URL. Replace localhost with your deployed backend when needed.
-    const backendUrl = 'https://cocinando-1.onrender.com/extract';
+    const backendUrl = 'http://localhost:8000/extract';
     fetch(backendUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
