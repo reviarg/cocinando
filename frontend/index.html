@@ -8,6 +8,8 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="stylesheet" href="styles.css">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-xh6giXxmfC+NMPHreELfknX0tGkGBVf+7P0ahOq04hqkzOUl57BbSK1cwChXxvbLH+E5YhkoX+w1K7uKm2/j2w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script defer src="script.js"></script>
 </head>
 <body data-page="home">
@@ -30,16 +32,34 @@
   </header>
 
   <main>
-    <section class="hero">
-      <div class="hero-section hero-add" id="hero-add">
-        <div class="hero-overlay">
-          <h2>Add a Recipe</h2>
+    <section class="home-hero">
+      <div class="hero-left">
+        <h1><span class="primary">Adventure</span> of <span class="accent">Delicacies</span></h1>
+        <p>Unlock a world of variety culinary recipes and unleash your inner chef the easy way with Cocinando.Life.</p>
+        <div class="hero-buttons">
+          <a href="add.html" class="btn-primary">Add a Recipe</a>
+          <a href="view.html" class="btn-secondary">View Recipes</a>
         </div>
       </div>
-      <div class="hero-section hero-view" id="hero-view">
-        <div class="hero-overlay">
-          <h2>View Your Recipes</h2>
-        </div>
+      <div class="hero-right">
+        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80" alt="Delicious dish">
+      </div>
+    </section>
+    <section class="features">
+      <div class="feature">
+        <i class="fa-solid fa-utensils"></i>
+        <h3>User‑Centered</h3>
+        <p>Your feedback shapes our platform, ensuring a seamless and satisfying culinary journey.</p>
+      </div>
+      <div class="feature">
+        <i class="fa-solid fa-seedling"></i>
+        <h3>Diverse Recipes</h3>
+        <p>We celebrate diverse culinary traditions from around the world, inspiring you today.</p>
+      </div>
+      <div class="feature">
+        <i class="fa-solid fa-people-group"></i>
+        <h3>Fun Community</h3>
+        <p>We foster a vibrant foodie community where joy comes with sharing recipes with us.</p>
       </div>
     </section>
   </main>

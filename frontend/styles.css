@@ -1,10 +1,12 @@
 /* Global styles and color palette */
 :root {
-  --primary: #780000;
-  --secondary: #C1121F;
-  --light: #FDF0D5;
-  --dark: #003049;
-  --accent: #669BBC;
+  /* Updated color palette inspired by the provided design */
+  --primary: #C1121F; /* accent red/orange */
+  --secondary: #780000; /* deep red for hover and emphasis */
+  --light: #FDF0D5; /* light cream background */
+  --dark: #003049; /* dark blue for text */
+  --accent: #669BBC; /* soft blue accent */
+  --neutral: #ffffff; /* white */
 }
 
 body {
@@ -20,8 +22,9 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 1rem;
-  background-color: var(--primary);
-  color: var(--light);
+  background-color: var(--neutral);
+  color: var(--dark);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .nav-left .brand {
@@ -29,7 +32,7 @@ body {
   align-items: center;
   font-size: 1.4rem;
   font-weight: bold;
-  color: var(--light);
+  color: var(--dark);
   text-decoration: none;
 }
 
@@ -51,27 +54,28 @@ body {
 }
 
 .nav-links a {
-  color: var(--light);
+  color: var(--dark);
   text-decoration: none;
   font-weight: 500;
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 4px;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-  background-color: var(--secondary);
+  background-color: var(--light);
+  color: var(--primary);
 }
 
 /* User menu (sign in / username) */
 .user-menu {
   position: relative;
-  color: var(--light);
+  color: var(--dark);
 }
 
 .user-menu a {
-  color: var(--light);
+  color: var(--dark);
   text-decoration: none;
   cursor: pointer;
   font-weight: 500;
@@ -81,8 +85,8 @@ body {
   position: absolute;
   right: 0;
   top: 100%;
-  background-color: var(--primary);
-  border: 1px solid var(--secondary);
+  background-color: var(--light);
+  border: 1px solid var(--primary);
   border-radius: 4px;
   overflow: hidden;
   display: none;
@@ -92,58 +96,114 @@ body {
 .dropdown a {
   display: block;
   padding: 0.5rem 1rem;
-  color: var(--light);
+  color: var(--dark);
   text-decoration: none;
   white-space: nowrap;
 }
 
 .dropdown a:hover {
-  background-color: var(--secondary);
+  background-color: var(--primary);
+  color: var(--light);
 }
 
-/* Hero section */
-.hero {
+/* Home hero section */
+.home-hero {
   display: flex;
   flex-wrap: wrap;
-}
-
-.hero-section {
-  flex: 1;
-  position: relative;
-  min-height: 60vh;
-  background-size: cover;
-  background-position: center;
-  cursor: pointer;
-  color: var(--light);
-}
-
-/* Use a different cooking-related image for the add section. The images are hosted on Unsplash and are free to use. */
-.hero-add {
-  background-image: url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80');
-}
-
-.hero-view {
-  background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80');
-}
-
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
+  padding: 2rem 1rem;
+  background-color: var(--light);
+}
+.hero-left {
+  flex: 1;
   padding: 1rem;
 }
-
-.hero-overlay h2 {
-  font-size: 2rem;
+.hero-left h1 {
+  font-size: 3rem;
   margin: 0;
+  line-height: 1.2;
+  color: var(--dark);
+}
+.hero-left h1 .primary {
+  color: var(--primary);
+}
+.hero-left h1 .accent {
+  color: var(--accent);
+}
+.hero-left p {
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  color: var(--dark);
+  max-width: 500px;
+}
+.hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.hero-buttons a {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.btn-primary {
+  background-color: var(--primary);
   color: var(--light);
+}
+.btn-primary:hover {
+  background-color: var(--secondary);
+}
+.btn-secondary {
+  background-color: var(--dark);
+  color: var(--light);
+}
+.btn-secondary:hover {
+  background-color: var(--secondary);
+}
+.hero-right {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+}
+.hero-right img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 8px;
+}
+
+/* Features section on home page */
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 2rem 0;
+}
+.feature {
+  flex: 1;
+  padding: 1rem;
+  text-align: center;
+  min-width: 200px;
+}
+.feature i {
+  font-size: 2rem;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+.feature h3 {
+  margin: 0.5rem 0;
+  font-size: 1.2rem;
+  color: var(--dark);
+}
+.feature p {
+  font-size: 0.9rem;
+  color: var(--dark);
+  max-width: 250px;
+  margin: 0 auto;
 }
 
 /* Content container */
@@ -282,9 +342,43 @@ body {
   margin: 0.25rem 0;
 }
 
-.view-btn {
+/* Action buttons container on recipe cards */
+.recipe-actions {
   margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+/* Buttons inside recipe actions */
+.recipe-actions button {
   padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+.view-btn {
+  background-color: var(--primary);
+  color: var(--light);
+}
+.edit-btn {
+  background-color: var(--accent);
+  color: var(--light);
+}
+.delete-btn {
+  background-color: var(--secondary);
+  color: var(--light);
+}
+.view-btn:hover {
+  background-color: var(--secondary);
+}
+.edit-btn:hover {
+  background-color: var(--dark);
+}
+.delete-btn:hover {
+  background-color: var(--dark);
 }
 
 /* Auth forms */

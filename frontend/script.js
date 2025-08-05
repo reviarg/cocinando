@@ -88,24 +88,8 @@
    * Initialiser for the home page. Makes hero sections clickable.
    */
   function initHome() {
-    const addSection = document.getElementById('hero-add');
-    const viewSection = document.getElementById('hero-view');
-    addSection.addEventListener('click', function () {
-      if (!localStorage.getItem('currentUser')) {
-        localStorage.setItem('redirectAfterLogin', 'add.html');
-        window.location.href = 'login.html';
-      } else {
-        window.location.href = 'add.html';
-      }
-    });
-    viewSection.addEventListener('click', function () {
-      if (!localStorage.getItem('currentUser')) {
-        localStorage.setItem('redirectAfterLogin', 'view.html');
-        window.location.href = 'login.html';
-      } else {
-        window.location.href = 'view.html';
-      }
-    });
+    // Home page buttons use standard links; authentication is enforced on the
+    // destination pages (add.html and view.html). No extra logic needed here.
   }
 
   /**
@@ -180,10 +164,32 @@
       window.location.href = 'login.html';
       return;
     }
-    // Populate date field
+    // Determine if editing an existing recipe
+    const editId = localStorage.getItem('editRecipeId');
+    const pageTitle = document.querySelector('.page-title');
+    // Populate fields accordingly
     const dateInput = document.getElementById('recipe-date');
     const now = new Date();
     dateInput.value = now.toLocaleDateString();
+    if (editId) {
+      // Change page title
+      if (pageTitle) pageTitle.textContent = 'Edit Recipe';
+      // Load recipe data
+      const currentUser = localStorage.getItem('currentUser');
+      const key = `recipes_${currentUser}`;
+      const recipes = JSON.parse(localStorage.getItem(key) || '[]');
+      const recipe = recipes.find(r => r.id == editId);
+      if (recipe) {
+        document.getElementById('recipe-url').value = recipe.url || '';
+        document.getElementById('recipe-title').value = recipe.title || '';
+        document.getElementById('recipe-source').value = recipe.source || '';
+        document.getElementById('recipe-date').value = recipe.date || now.toLocaleDateString();
+        document.getElementById('recipe-ingredients').value = (recipe.ingredients || []).join('\n');
+        document.getElementById('recipe-steps').value = (recipe.steps || []).join('\n');
+        document.getElementById('recipe-tags').value = (recipe.tags || []).join(', ');
+        // We cannot prefill the image file input; skip.
+      }
+    }
     // Extract button handler
     const extractBtn = document.getElementById('extract-btn');
     extractBtn.addEventListener('click', handleExtraction);
@@ -258,6 +264,27 @@
       };
       const key = `recipes_${currentUser}`;
       const recipes = JSON.parse(localStorage.getItem(key) || '[]');
+      // Check if editing
+      const editId = localStorage.getItem('editRecipeId');
+      if (editId) {
+        // Update existing recipe
+        const idx = recipes.findIndex(r => r.id == editId);
+        if (idx >= 0) {
+          // Preserve original id
+          recipe.id = parseInt(editId);
+          recipes[idx] = recipe;
+        } else {
+          // If not found, append
+          recipes.push(recipe);
+        }
+        localStorage.removeItem('editRecipeId');
+        localStorage.setItem(key, JSON.stringify(recipes));
+        alert('Recipe updated successfully!');
+        // Redirect to view page after editing
+        window.location.href = 'view.html';
+        return;
+      }
+      // Not editing: add new recipe
       recipes.push(recipe);
       localStorage.setItem(key, JSON.stringify(recipes));
       alert('Recipe saved successfully!');
@@ -353,11 +380,25 @@
         });
         card.appendChild(tagContainer);
       }
+      // Container for action buttons (view, edit, delete)
+      const actionContainer = document.createElement('div');
+      actionContainer.className = 'recipe-actions';
       // View details button
       const viewBtn = document.createElement('button');
       viewBtn.className = 'view-btn';
       viewBtn.textContent = 'View Details';
-      card.appendChild(viewBtn);
+      actionContainer.appendChild(viewBtn);
+      // Edit button
+      const editBtn = document.createElement('button');
+      editBtn.className = 'edit-btn';
+      editBtn.textContent = 'Edit';
+      actionContainer.appendChild(editBtn);
+      // Delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.textContent = 'Delete';
+      actionContainer.appendChild(deleteBtn);
+      card.appendChild(actionContainer);
       // Details section
       const details = document.createElement('div');
       details.className = 'details';
@@ -410,6 +451,23 @@
         const isVisible = details.style.display === 'block';
         details.style.display = isVisible ? 'none' : 'block';
         viewBtn.textContent = isVisible ? 'View Details' : 'Hide Details';
+      });
+      // Edit handler
+      editBtn.addEventListener('click', function () {
+        localStorage.setItem('editRecipeId', recipe.id);
+        window.location.href = 'add.html';
+      });
+      // Delete handler
+      deleteBtn.addEventListener('click', function () {
+        if (confirm('Are you sure you want to delete this recipe?')) {
+          const currentUser = localStorage.getItem('currentUser');
+          const key = `recipes_${currentUser}`;
+          const allRecipes = JSON.parse(localStorage.getItem(key) || '[]');
+          const updated = allRecipes.filter(r => r.id !== recipe.id);
+          localStorage.setItem(key, JSON.stringify(updated));
+          // Re-render the list
+          renderRecipes();
+        }
       });
       container.appendChild(card);
     });
