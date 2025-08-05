@@ -1,36 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recipe Organizer – View Recipes</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body data-page="view">
-    <header>
-      <div class="header-content">
-        <h1><a href="home.html">Recipe Organizer</a></h1>
-        <nav class="nav-links">
-          <a href="add.html">Add Recipe</a>
-          <a href="view.html" class="active">View Recipes</a>
-        </nav>
-        <div class="user-info">
-          <span id="userDisplayName"></span>
-          <button id="logoutButton" class="logout">Log Out</button>
-        </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Recipes - Cocinando.Life</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+</head>
+<body data-page="view">
+  <header>
+    <nav class="navbar">
+      <div class="nav-left">
+        <a href="index.html" class="brand">
+          <img src="icon.png" alt="Cocinando.Life logo" class="logo">
+          <span>Cocinando.Life</span>
+        </a>
       </div>
-    </header>
-    <main class="container">
-      <section>
-        <h2>Your Recipes</h2>
-        <div class="filter-section">
-          <input type="text" id="filterInput" placeholder="Filter by tag or title..." />
-          <button id="clearFilter" class="clear-filter">Clear filter</button>
-        </div>
-        <ul id="recipesList" class="recipe-list"></ul>
-      </section>
-    </main>
-    <script src="script.js"></script>
-  </body>
+      <ul class="nav-links">
+        <li><a href="add.html" id="nav-add">Add Recipe</a></li>
+        <li><a href="view.html" id="nav-view" class="active">View Recipes</a></li>
+      </ul>
+      <div class="user-menu" id="user-menu">
+        <!-- Populated by script.js -->
+      </div>
+    </nav>
+  </header>
+  <main class="content-container">
+    <h1 class="page-title">Your Recipes</h1>
+    <div class="filter-row">
+      <input type="text" id="filter-input" placeholder="Filter by title or tag">
+      <button type="button" id="clear-filter" class="btn-secondary">Clear</button>
+    </div>
+    <div id="recipes-container" class="recipes-container">
+      <!-- Recipes will be rendered here -->
+    </div>
+  </main>
+</body>
 </html>

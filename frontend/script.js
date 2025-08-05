@@ -1,597 +1,417 @@
 /*
- * script.js – core logic for the recipe organizer website
+ * script.js – client-side logic for Cocinando.Life
  *
- * This script handles user authentication using localStorage, as well as
- * creation and display of recipe entries. Recipes are stored per-user in
- * localStorage under the key `recipes_<username>` and the currently
- * authenticated user is stored under the key `currentUser`.
+ * This script handles navigation rendering, authentication, recipe storage,
+ * extraction via the backend server, and dynamic page initialization.
  */
 
 (function () {
   /**
-   * Retrieve the current page identifier from the body dataset. This value
-   * determines which initialization function to run.
+   * Initialise the correct page based on the data-page attribute on the body.
    */
-  const page = document.body.dataset.page;
+  document.addEventListener('DOMContentLoaded', function () {
+    renderNav();
+    const page = document.body.dataset.page;
+    switch (page) {
+      case 'home':
+        initHome();
+        break;
+      case 'add':
+        initAdd();
+        break;
+      case 'view':
+        initView();
+        break;
+      case 'login':
+        initLogin();
+        break;
+      case 'signup':
+        initSignup();
+        break;
+      default:
+        break;
+    }
+  });
 
-  switch (page) {
-    case 'login':
-      initLogin();
-      break;
-    case 'signup':
-      initSignup();
-      break;
-    case 'home':
-      initHome();
-      break;
-    case 'add':
-      initAdd();
-      break;
-    case 'view':
-      initView();
-      break;
-    // Legacy support for dashboard page
-    case 'dashboard':
-      initDashboard();
-      break;
+  /**
+   * Render the navigation bar's user section based on authentication state.
+   */
+  function renderNav() {
+    const userMenu = document.getElementById('user-menu');
+    if (!userMenu) return;
+    userMenu.innerHTML = '';
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      // Create user link with dropdown arrow
+      const userLink = document.createElement('a');
+      userLink.href = '#';
+      userLink.textContent = currentUser + ' ▼';
+      userLink.className = 'user-link';
+      userMenu.appendChild(userLink);
+      // Dropdown container
+      const dropdown = document.createElement('div');
+      dropdown.className = 'dropdown';
+      // Logout option
+      const logoutLink = document.createElement('a');
+      logoutLink.href = '#';
+      logoutLink.textContent = 'Log out';
+      dropdown.appendChild(logoutLink);
+      userMenu.appendChild(dropdown);
+      // Toggle dropdown on click
+      userLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+      });
+      // Logout handler
+      logoutLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        localStorage.removeItem('currentUser');
+        renderNav();
+        window.location.href = 'index.html';
+      });
+      // Hide dropdown when clicking outside
+      document.addEventListener('click', function handler(ev) {
+        if (!userMenu.contains(ev.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+    } else {
+      // Not logged in: show sign-in link
+      const signInLink = document.createElement('a');
+      signInLink.href = 'login.html';
+      signInLink.textContent = 'Sign in';
+      userMenu.appendChild(signInLink);
+    }
   }
 
   /**
-   * Initialize the login page. Attach event listeners to handle form
-   * submission and perform authentication against stored user data.
+   * Initialiser for the home page. Makes hero sections clickable.
+   */
+  function initHome() {
+    const addSection = document.getElementById('hero-add');
+    const viewSection = document.getElementById('hero-view');
+    addSection.addEventListener('click', function () {
+      if (!localStorage.getItem('currentUser')) {
+        localStorage.setItem('redirectAfterLogin', 'add.html');
+        window.location.href = 'login.html';
+      } else {
+        window.location.href = 'add.html';
+      }
+    });
+    viewSection.addEventListener('click', function () {
+      if (!localStorage.getItem('currentUser')) {
+        localStorage.setItem('redirectAfterLogin', 'view.html');
+        window.location.href = 'login.html';
+      } else {
+        window.location.href = 'view.html';
+      }
+    });
+  }
+
+  /**
+   * Initialiser for the login page.
    */
   function initLogin() {
-    const form = document.getElementById('loginForm');
+    const form = document.getElementById('login-form');
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       const username = document.getElementById('login-username').value.trim();
       const password = document.getElementById('login-password').value;
-      if (!username || !password) return;
-      const users = loadUsers();
-      if (!users[username] || users[username].password !== password) {
+      if (!username || !password) {
+        alert('Please enter your username and password.');
+        return;
+      }
+      const users = JSON.parse(localStorage.getItem('users') || '{}');
+      if (!users[username] || users[username] !== password) {
         alert('Invalid username or password.');
         return;
       }
-      // Store the current user and redirect
       localStorage.setItem('currentUser', username);
-      window.location.href = 'home.html';
+      renderNav();
+      const redirect = localStorage.getItem('redirectAfterLogin');
+      if (redirect) {
+        localStorage.removeItem('redirectAfterLogin');
+        window.location.href = redirect;
+      } else {
+        window.location.href = 'index.html';
+      }
     });
   }
 
   /**
-   * Initialize the signup page. Validate the signup form and store new
-   * user credentials in localStorage. On success, redirect to login.
+   * Initialiser for the signup page.
    */
   function initSignup() {
-    const form = document.getElementById('signupForm');
+    const form = document.getElementById('signup-form');
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       const username = document.getElementById('signup-username').value.trim();
       const password = document.getElementById('signup-password').value;
-      const confirm = document.getElementById('signup-confirm').value;
       if (!username || !password) {
-        alert('Please fill out all fields.');
+        alert('Please fill in all fields.');
         return;
       }
-      if (password !== confirm) {
-        alert('Passwords do not match.');
-        return;
-      }
-      const users = loadUsers();
+      const users = JSON.parse(localStorage.getItem('users') || '{}');
       if (users[username]) {
-        alert('Username already exists. Please choose another.');
+        alert('Username already exists.');
         return;
       }
-      // Store the new user
-      users[username] = { password: password };
-      saveUsers(users);
-      alert('Account created successfully! You can now log in.');
-      window.location.href = 'index.html';
-    });
-  }
-
-  /**
-   * Initialize the dashboard page. Set up event listeners for adding
-   * recipes, filtering the list, and logging out. Load the current
-   * user's recipes from localStorage and render them.
-   */
-  function initDashboard() {
-    // Verify a user is logged in
-    const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) {
-      // No user; redirect to login
-      window.location.href = 'index.html';
-      return;
-    }
-    // Display username
-    const userDisplay = document.getElementById('userDisplayName');
-    if (userDisplay) userDisplay.textContent = currentUser;
-    // Logout button
-    const logoutButton = document.getElementById('logoutButton');
-    logoutButton.addEventListener('click', function () {
-      localStorage.removeItem('currentUser');
-      window.location.href = 'index.html';
-    });
-    // Load and render recipes
-    renderRecipes(loadRecipes(currentUser));
-    // Handle recipe submission
-    const recipeForm = document.getElementById('recipeForm');
-    recipeForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const url = document.getElementById('recipe-url').value.trim();
-      const title = document.getElementById('recipe-title').value.trim();
-      const ingredientsText = document.getElementById('recipe-ingredients').value.trim();
-      const stepsText = document.getElementById('recipe-steps').value.trim();
-      const tagsText = document.getElementById('recipe-tags').value.trim();
-      const imageInput = document.getElementById('recipe-image');
-      if (!url || !title || !ingredientsText || !stepsText) {
-        alert('Please fill out all required fields.');
-        return;
-      }
-      // Derive the source hostname
-      let source;
-      try {
-        const parsed = new URL(url);
-        source = parsed.hostname.replace(/^www\./, '');
-      } catch (err) {
-        alert('Invalid URL provided.');
-        return;
-      }
-      const ingredients = ingredientsText
-        .split(/\n+/)
-        .map((line) => line.trim())
-        .filter(Boolean);
-      const tags = tagsText
-        ? tagsText
-            .split(',')
-            .map((t) => t.trim().toLowerCase())
-            .filter(Boolean)
-        : [];
-      // Helper to persist the recipe once we have the image (or not)
-      function persistRecipe(imageData) {
-        const newRecipe = {
-          id: Date.now(),
-          url,
-          title,
-          source,
-          ingredients,
-          steps: stepsText,
-          tags,
-          image: imageData || null,
-          createdAt: new Date().toISOString(),
-        };
-        const recipes = loadRecipes(currentUser);
-        recipes.unshift(newRecipe);
-        saveRecipes(currentUser, recipes);
-        renderRecipes(recipes);
-        // Reset form fields (including file input)
-        recipeForm.reset();
-      }
-      const file = imageInput && imageInput.files ? imageInput.files[0] : null;
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function (ev) {
-          persistRecipe(ev.target.result);
-        };
-        reader.onerror = function () {
-          // If reading fails, still save without image
-          persistRecipe(null);
-        };
-        reader.readAsDataURL(file);
+      users[username] = password;
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('currentUser', username);
+      renderNav();
+      const redirect = localStorage.getItem('redirectAfterLogin');
+      if (redirect) {
+        localStorage.removeItem('redirectAfterLogin');
+        window.location.href = redirect;
       } else {
-        persistRecipe(null);
+        window.location.href = 'index.html';
       }
     });
-    // Filtering functionality
-    const filterInput = document.getElementById('filterInput');
-    filterInput.addEventListener('input', function (e) {
-      const query = e.target.value.toLowerCase();
-      const recipes = loadRecipes(currentUser);
-      const filtered = recipes.filter((recipe) => {
-        return (
-          recipe.title.toLowerCase().includes(query) ||
-          recipe.tags.some((t) => t.includes(query))
-        );
-      });
-      renderRecipes(filtered);
-    });
-    const clearFilterButton = document.getElementById('clearFilter');
-    clearFilterButton.addEventListener('click', function () {
-      filterInput.value = '';
-      renderRecipes(loadRecipes(currentUser));
-    });
+  }
 
-    // Extraction functionality
-    const extractButton = document.getElementById('extractButton');
-    if (extractButton) {
-      extractButton.addEventListener('click', function () {
-        const urlInput = document.getElementById('recipe-url');
-        const targetUrl = urlInput.value.trim();
-        if (!targetUrl) {
-          alert('Please enter a URL to extract from.');
-          return;
+  /**
+   * Initialiser for the add recipe page.
+   */
+  function initAdd() {
+    // Enforce authentication
+    if (!localStorage.getItem('currentUser')) {
+      localStorage.setItem('redirectAfterLogin', 'add.html');
+      window.location.href = 'login.html';
+      return;
+    }
+    // Populate date field
+    const dateInput = document.getElementById('recipe-date');
+    const now = new Date();
+    dateInput.value = now.toLocaleDateString();
+    // Extract button handler
+    const extractBtn = document.getElementById('extract-btn');
+    extractBtn.addEventListener('click', handleExtraction);
+    // Form submission
+    const form = document.getElementById('add-recipe-form');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      saveRecipe();
+    });
+  }
+
+  /**
+   * Call the backend extraction endpoint to extract recipe details.
+   */
+  function handleExtraction() {
+    const urlField = document.getElementById('recipe-url');
+    const url = urlField.value.trim();
+    if (!url) {
+      alert('Please enter a recipe URL to extract.');
+      return;
+    }
+    // Determine backend URL. Replace localhost with your deployed backend when needed.
+    const backendUrl = 'http://localhost:8000/extract';
+    fetch(backendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: url })
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Fill in fields with extracted data if available
+        if (data.title) document.getElementById('recipe-title').value = data.title;
+        document.getElementById('recipe-source').value = getSourceFromUrl(url);
+        if (Array.isArray(data.ingredients)) {
+          document.getElementById('recipe-ingredients').value = data.ingredients.join('\n');
         }
-        extractButton.disabled = true;
-        extractButton.textContent = 'Extracting…';
-        fetch('http://localhost:8000/extract', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: targetUrl }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error('Server error');
-            }
-            return response.json();
-          })
-          .then((data) => {
-            // Fill the form fields if values are returned
-            if (data.title) {
-              document.getElementById('recipe-title').value = data.title;
-            }
-            if (data.ingredients && Array.isArray(data.ingredients) && data.ingredients.length) {
-              document.getElementById('recipe-ingredients').value = data.ingredients.join('\n');
-            }
-            if (data.steps && Array.isArray(data.steps) && data.steps.length) {
-              document.getElementById('recipe-steps').value = data.steps.join('\n');
-            }
-            // Optionally, auto‑generate simple tags from the title
-            // For now we leave tags blank for manual entry
-          })
-          .catch((err) => {
-            console.error(err);
-            alert('Extraction failed: ' + err.message);
-          })
-          .finally(() => {
-            extractButton.disabled = false;
-            extractButton.textContent = 'Extract';
-          });
+        if (Array.isArray(data.steps)) {
+          document.getElementById('recipe-steps').value = data.steps.join('\n');
+        }
+      })
+      .catch(() => {
+        alert('Extraction failed. Please check the URL or try again later.');
       });
+  }
+
+  /**
+   * Save the recipe to localStorage for the current user.
+   */
+  function saveRecipe() {
+    const currentUser = localStorage.getItem('currentUser');
+    const title = document.getElementById('recipe-title').value.trim();
+    const source = document.getElementById('recipe-source').value.trim();
+    const date = document.getElementById('recipe-date').value.trim();
+    const ingredients = document.getElementById('recipe-ingredients').value.trim().split(/\n+/).filter(Boolean);
+    const steps = document.getElementById('recipe-steps').value.trim().split(/\n+/).filter(Boolean);
+    const tags = document.getElementById('recipe-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+    // Handle image upload
+    const imageInput = document.getElementById('recipe-image');
+    const file = imageInput.files[0];
+    // Build recipe object and then store after reading image if needed
+    const finalizeSave = (imageData) => {
+      const recipe = {
+        id: Date.now(),
+        url: document.getElementById('recipe-url').value.trim(),
+        title,
+        source,
+        date,
+        ingredients,
+        steps,
+        tags,
+        image: imageData || null
+      };
+      const key = `recipes_${currentUser}`;
+      const recipes = JSON.parse(localStorage.getItem(key) || '[]');
+      recipes.push(recipe);
+      localStorage.setItem(key, JSON.stringify(recipes));
+      alert('Recipe saved successfully!');
+      // Reset form
+      document.getElementById('add-recipe-form').reset();
+      document.getElementById('recipe-source').value = '';
+      document.getElementById('recipe-date').value = new Date().toLocaleDateString();
+    };
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        finalizeSave(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      finalizeSave(null);
     }
   }
 
   /**
-   * Render the given recipes array into the DOM. It removes existing
-   * elements and creates new DOM nodes for each recipe.
-   *
-   * @param {Array} recipes – An array of recipe objects.
+   * Initialiser for the view recipes page.
    */
-  function renderRecipes(recipes) {
-    const list = document.getElementById('recipesList');
-    if (!list) return;
-    list.innerHTML = '';
-    if (!recipes || recipes.length === 0) {
-      const li = document.createElement('li');
-      li.textContent = 'No recipes found. Start by adding one!';
-      li.style.fontStyle = 'italic';
-      list.appendChild(li);
+  function initView() {
+    // Enforce authentication
+    if (!localStorage.getItem('currentUser')) {
+      localStorage.setItem('redirectAfterLogin', 'view.html');
+      window.location.href = 'login.html';
       return;
     }
-    recipes.forEach((recipe) => {
-      const li = document.createElement('li');
-      li.classList.add('recipe-item');
-      // Title
+    const filterInput = document.getElementById('filter-input');
+    const clearBtn = document.getElementById('clear-filter');
+    const container = document.getElementById('recipes-container');
+    filterInput.addEventListener('input', renderRecipes);
+    clearBtn.addEventListener('click', function () {
+      filterInput.value = '';
+      renderRecipes();
+    });
+    renderRecipes();
+  }
+
+  /**
+   * Get the source domain from a URL string.
+   */
+  function getSourceFromUrl(url) {
+    try {
+      const u = new URL(url);
+      return u.hostname.replace('www.', '');
+    } catch (e) {
+      return '';
+    }
+  }
+
+  /**
+   * Retrieve recipes for the current user.
+   */
+  function getRecipes() {
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) return [];
+    const key = `recipes_${currentUser}`;
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  }
+
+  /**
+   * Render the list of recipes in the view page according to the filter.
+   */
+  function renderRecipes() {
+    const container = document.getElementById('recipes-container');
+    if (!container) return;
+    container.innerHTML = '';
+    const filterValue = document.getElementById('filter-input').value.toLowerCase();
+    const recipes = getRecipes();
+    recipes.forEach(recipe => {
+      if (filterValue && !recipe.title.toLowerCase().includes(filterValue) && !recipe.tags.some(t => t.toLowerCase().includes(filterValue))) {
+        return;
+      }
+      const card = document.createElement('div');
+      card.className = 'recipe-card';
       const title = document.createElement('h3');
       title.textContent = recipe.title;
-      // Meta information: source and date
-      const meta = document.createElement('div');
-      meta.classList.add('recipe-meta');
-      const date = new Date(recipe.createdAt);
-      meta.textContent = `${recipe.source} • ${date.toLocaleDateString()}`;
+      card.appendChild(title);
+      const meta = document.createElement('p');
+      meta.textContent = `${recipe.source} • ${recipe.date}`;
+      card.appendChild(meta);
       // Tags
-      const tagsDiv = document.createElement('div');
-      tagsDiv.classList.add('recipe-tags');
-      recipe.tags.forEach((t) => {
-        const tagSpan = document.createElement('span');
-        tagSpan.classList.add('tag');
-        tagSpan.textContent = t;
-        tagsDiv.appendChild(tagSpan);
-      });
-      // Details toggle button
-      const detailsButton = document.createElement('button');
-      detailsButton.type = 'button';
-      detailsButton.classList.add('details-button');
-      detailsButton.textContent = 'View Details';
-      // Details container
-      const detailsDiv = document.createElement('div');
-      detailsDiv.classList.add('recipe-details');
-      detailsDiv.style.display = 'none';
-      // Build details content
-      // Image
+      if (recipe.tags && recipe.tags.length) {
+        const tagContainer = document.createElement('div');
+        tagContainer.className = 'tags';
+        recipe.tags.forEach(tag => {
+          const span = document.createElement('span');
+          span.className = 'tag';
+          span.textContent = tag;
+          tagContainer.appendChild(span);
+        });
+        card.appendChild(tagContainer);
+      }
+      // View details button
+      const viewBtn = document.createElement('button');
+      viewBtn.className = 'view-btn';
+      viewBtn.textContent = 'View Details';
+      card.appendChild(viewBtn);
+      // Details section
+      const details = document.createElement('div');
+      details.className = 'details';
+      // Add image if exists
       if (recipe.image) {
         const img = document.createElement('img');
         img.src = recipe.image;
-        img.alt = recipe.title + ' image';
-        detailsDiv.appendChild(img);
+        details.appendChild(img);
       }
       // Ingredients
-      const ingHeading = document.createElement('h4');
-      ingHeading.textContent = 'Ingredients';
-      detailsDiv.appendChild(ingHeading);
-      const ingList = document.createElement('ul');
-      recipe.ingredients.forEach((ing) => {
-        const liIng = document.createElement('li');
-        liIng.textContent = ing;
-        ingList.appendChild(liIng);
-      });
-      detailsDiv.appendChild(ingList);
-      // Steps
-      const stepsHeading = document.createElement('h4');
-      stepsHeading.textContent = 'Steps';
-      detailsDiv.appendChild(stepsHeading);
-      const stepsList = document.createElement('ol');
-      // Steps may be stored as a single string; split on newlines
-      const stepsArray = Array.isArray(recipe.steps)
-        ? recipe.steps
-        : recipe.steps.split(/\n+/).map((s) => s.trim()).filter(Boolean);
-      stepsArray.forEach((step) => {
-        const liStep = document.createElement('li');
-        liStep.textContent = step;
-        stepsList.appendChild(liStep);
-      });
-      detailsDiv.appendChild(stepsList);
-      // Link
-      const linkHeading = document.createElement('h4');
-      linkHeading.textContent = 'Source';
-      detailsDiv.appendChild(linkHeading);
-      const linkAnchor = document.createElement('a');
-      linkAnchor.href = recipe.url;
-      linkAnchor.textContent = recipe.url;
-      linkAnchor.target = '_blank';
-      linkAnchor.rel = 'noopener noreferrer';
-      detailsDiv.appendChild(linkAnchor);
-      // Append children to recipe item
-      li.appendChild(title);
-      li.appendChild(meta);
-      if (recipe.tags.length) li.appendChild(tagsDiv);
-      li.appendChild(detailsButton);
-      li.appendChild(detailsDiv);
-      // Toggle logic
-      detailsButton.addEventListener('click', function () {
-        const isHidden = detailsDiv.style.display === 'none';
-        detailsDiv.style.display = isHidden ? 'block' : 'none';
-        detailsButton.textContent = isHidden ? 'Hide Details' : 'View Details';
-      });
-      list.appendChild(li);
-    });
-  }
-
-  /**
-   * Retrieve all registered users from localStorage. The users are stored
-   * as a mapping of usernames to user objects.
-   *
-   * @returns {Object}
-   */
-  function loadUsers() {
-    const raw = localStorage.getItem('users');
-    return raw ? JSON.parse(raw) : {};
-  }
-
-  /**
-   * Persist the users mapping to localStorage.
-   *
-   * @param {Object} users
-   */
-  function saveUsers(users) {
-    localStorage.setItem('users', JSON.stringify(users));
-  }
-
-  /**
-   * Load recipes for a specific user from localStorage. Returns an empty
-   * array if none exist.
-   *
-   * @param {string} username
-   * @returns {Array}
-   */
-  function loadRecipes(username) {
-    const raw = localStorage.getItem('recipes_' + username);
-    return raw ? JSON.parse(raw) : [];
-  }
-
-  /**
-   * Save the recipes array for a user back into localStorage.
-   *
-   * @param {string} username
-   * @param {Array} recipes
-   */
-  function saveRecipes(username, recipes) {
-    localStorage.setItem('recipes_' + username, JSON.stringify(recipes));
-  }
-
-  /**
-   * Initialize the home page. Verifies authentication and populates the
-   * username. Provides logout functionality.
-   */
-  function initHome() {
-    const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) {
-      window.location.href = 'index.html';
-      return;
-    }
-    const userDisplay = document.getElementById('userDisplayName');
-    if (userDisplay) userDisplay.textContent = currentUser;
-    const logoutButton = document.getElementById('logoutButton');
-    if (logoutButton) {
-      logoutButton.addEventListener('click', function () {
-        localStorage.removeItem('currentUser');
-        window.location.href = 'index.html';
-      });
-    }
-  }
-
-  /**
-   * Initialize the add recipe page. Handles adding new recipes and
-   * extraction while verifying authentication. Does not render a recipe
-   * list.
-   */
-  function initAdd() {
-    const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) {
-      window.location.href = 'index.html';
-      return;
-    }
-    const userDisplay = document.getElementById('userDisplayName');
-    if (userDisplay) userDisplay.textContent = currentUser;
-    const logoutButton = document.getElementById('logoutButton');
-    if (logoutButton) {
-      logoutButton.addEventListener('click', function () {
-        localStorage.removeItem('currentUser');
-        window.location.href = 'index.html';
-      });
-    }
-    // Handle recipe submission
-    const recipeForm = document.getElementById('recipeForm');
-    if (recipeForm) {
-      recipeForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const url = document.getElementById('recipe-url').value.trim();
-        const title = document.getElementById('recipe-title').value.trim();
-        const ingredientsText = document.getElementById('recipe-ingredients').value.trim();
-        const stepsText = document.getElementById('recipe-steps').value.trim();
-        const tagsText = document.getElementById('recipe-tags').value.trim();
-        const imageInput = document.getElementById('recipe-image');
-        if (!url || !title || !ingredientsText || !stepsText) {
-          alert('Please fill out all required fields.');
-          return;
-        }
-        let source;
-        try {
-          const parsed = new URL(url);
-          source = parsed.hostname.replace(/^www\./, '');
-        } catch (err) {
-          alert('Invalid URL provided.');
-          return;
-        }
-        const ingredients = ingredientsText
-          .split(/\n+/)
-          .map((line) => line.trim())
-          .filter(Boolean);
-        const tags = tagsText
-          ? tagsText
-              .split(',')
-              .map((t) => t.trim().toLowerCase())
-              .filter(Boolean)
-          : [];
-        function persist(imageData) {
-          const newRecipe = {
-            id: Date.now(),
-            url,
-            title,
-            source,
-            ingredients,
-            steps: stepsText,
-            tags,
-            image: imageData || null,
-            createdAt: new Date().toISOString(),
-          };
-          const recipes = loadRecipes(currentUser);
-          recipes.unshift(newRecipe);
-          saveRecipes(currentUser, recipes);
-          // Reset form after save
-          recipeForm.reset();
-          alert('Recipe added successfully.');
-        }
-        const file = imageInput && imageInput.files ? imageInput.files[0] : null;
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function (ev) {
-            persist(ev.target.result);
-          };
-          reader.onerror = function () {
-            persist(null);
-          };
-          reader.readAsDataURL(file);
-        } else {
-          persist(null);
-        }
-      });
-    }
-    // Extraction functionality
-    const extractButton = document.getElementById('extractButton');
-    if (extractButton) {
-      extractButton.addEventListener('click', function () {
-        const urlInput = document.getElementById('recipe-url');
-        const targetUrl = urlInput.value.trim();
-        if (!targetUrl) {
-          alert('Please enter a URL to extract from.');
-          return;
-        }
-        extractButton.disabled = true;
-        extractButton.textContent = 'Extracting…';
-        fetch('http://localhost:8000/extract', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: targetUrl }),
-        })
-          .then((response) => {
-            if (!response.ok) throw new Error('Server error');
-            return response.json();
-          })
-          .then((data) => {
-            if (data.title) {
-              document.getElementById('recipe-title').value = data.title;
-            }
-            if (data.ingredients && Array.isArray(data.ingredients) && data.ingredients.length) {
-              document.getElementById('recipe-ingredients').value = data.ingredients.join('\n');
-            }
-            if (data.steps && Array.isArray(data.steps) && data.steps.length) {
-              document.getElementById('recipe-steps').value = data.steps.join('\n');
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-            alert('Extraction failed: ' + err.message);
-          })
-          .finally(() => {
-            extractButton.disabled = false;
-            extractButton.textContent = 'Extract';
-          });
-      });
-    }
-  }
-
-  /**
-   * Initialize the view recipes page. Renders the list and enables
-   * filtering. Requires the user to be logged in.
-   */
-  function initView() {
-    const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) {
-      window.location.href = 'index.html';
-      return;
-    }
-    const userDisplay = document.getElementById('userDisplayName');
-    if (userDisplay) userDisplay.textContent = currentUser;
-    const logoutButton = document.getElementById('logoutButton');
-    if (logoutButton) {
-      logoutButton.addEventListener('click', function () {
-        localStorage.removeItem('currentUser');
-        window.location.href = 'index.html';
-      });
-    }
-    // Render the user's recipes
-    renderRecipes(loadRecipes(currentUser));
-    // Filtering functionality
-    const filterInput = document.getElementById('filterInput');
-    if (filterInput) {
-      filterInput.addEventListener('input', function (e) {
-        const query = e.target.value.toLowerCase();
-        const recipes = loadRecipes(currentUser);
-        const filtered = recipes.filter((recipe) => {
-          return (
-            recipe.title.toLowerCase().includes(query) ||
-            recipe.tags.some((t) => t.includes(query))
-          );
+      if (recipe.ingredients && recipe.ingredients.length) {
+        const ingHeader = document.createElement('p');
+        ingHeader.innerHTML = '<strong>Ingredients:</strong>';
+        details.appendChild(ingHeader);
+        const ul = document.createElement('ul');
+        recipe.ingredients.forEach(i => {
+          const li = document.createElement('li');
+          li.textContent = i;
+          ul.appendChild(li);
         });
-        renderRecipes(filtered);
+        details.appendChild(ul);
+      }
+      // Steps
+      if (recipe.steps && recipe.steps.length) {
+        const stepsHeader = document.createElement('p');
+        stepsHeader.innerHTML = '<strong>Steps:</strong>';
+        details.appendChild(stepsHeader);
+        const ol = document.createElement('ol');
+        recipe.steps.forEach(s => {
+          const li = document.createElement('li');
+          li.textContent = s;
+          ol.appendChild(li);
+        });
+        details.appendChild(ol);
+      }
+      // Source link
+      if (recipe.url) {
+        const linkPara = document.createElement('p');
+        const link = document.createElement('a');
+        link.href = recipe.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = 'View original';
+        linkPara.appendChild(link);
+        details.appendChild(linkPara);
+      }
+      card.appendChild(details);
+      // Toggle details
+      viewBtn.addEventListener('click', function () {
+        const isVisible = details.style.display === 'block';
+        details.style.display = isVisible ? 'none' : 'block';
+        viewBtn.textContent = isVisible ? 'View Details' : 'Hide Details';
       });
-    }
-    const clearFilterButton = document.getElementById('clearFilter');
-    if (clearFilterButton) {
-      clearFilterButton.addEventListener('click', function () {
-        if (filterInput) filterInput.value = '';
-        renderRecipes(loadRecipes(currentUser));
-      });
-    }
+      container.appendChild(card);
+    });
   }
 })();

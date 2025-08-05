@@ -1,28 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recipe Organizer – Log In</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body data-page="login" class="centered">
-    <form id="loginForm">
-      <h2>Sign In</h2>
-      <div class="form-group">
-        <label for="login-username">Username</label>
-        <input type="text" id="login-username" name="username" required />
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cocinando.Life</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+</head>
+<body data-page="home">
+  <header>
+    <nav class="navbar">
+      <div class="nav-left">
+        <a href="index.html" class="brand">
+          <img src="icon.png" alt="Cocinando.Life logo" class="logo">
+          <span>Cocinando.Life</span>
+        </a>
       </div>
-      <div class="form-group">
-        <label for="login-password">Password</label>
-        <input type="password" id="login-password" name="password" required />
+      <ul class="nav-links">
+        <li><a href="add.html" id="nav-add">Add Recipe</a></li>
+        <li><a href="view.html" id="nav-view">View Recipes</a></li>
+      </ul>
+      <div class="user-menu" id="user-menu">
+        <!-- Populated dynamically in script.js -->
       </div>
-      <button type="submit" class="btn" id="login-submit">Log In</button>
-      <p style="margin-top:1rem; text-align:center; font-size:0.875rem;">
-        Don't have an account? <a href="signup.html">Sign up</a>
-      </p>
-    </form>
-    <script src="script.js"></script>
-  </body>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-section hero-add" id="hero-add">
+        <div class="hero-overlay">
+          <h2>Add a Recipe</h2>
+        </div>
+      </div>
+      <div class="hero-section hero-view" id="hero-view">
+        <div class="hero-overlay">
+          <h2>View Your Recipes</h2>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
 </html>

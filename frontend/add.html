@@ -1,62 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recipe Organizer – Add Recipe</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body data-page="add">
-    <header>
-      <div class="header-content">
-        <h1><a href="home.html">Recipe Organizer</a></h1>
-        <nav class="nav-links">
-          <a href="add.html" class="active">Add Recipe</a>
-          <a href="view.html">View Recipes</a>
-        </nav>
-        <div class="user-info">
-          <span id="userDisplayName"></span>
-          <button id="logoutButton" class="logout">Log Out</button>
-        </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Recipe - Cocinando.Life</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+</head>
+<body data-page="add">
+  <header>
+    <nav class="navbar">
+      <div class="nav-left">
+        <a href="index.html" class="brand">
+          <img src="icon.png" alt="Cocinando.Life logo" class="logo">
+          <span>Cocinando.Life</span>
+        </a>
       </div>
-    </header>
-    <main class="container">
-      <section>
-        <h2>Add New Recipe</h2>
-        <form id="recipeForm">
-          <div class="form-group">
-            <label for="recipe-url">Recipe URL</label>
-            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
-              <input type="url" id="recipe-url" name="url" placeholder="https://example.com/my-favourite-recipe" style="flex:1 1 auto;" required />
-              <button type="button" id="extractButton" class="btn btn-secondary" style="flex:0 0 auto;">Extract</button>
-            </div>
-            <small style="display:block; margin-top:0.25rem; font-size:0.75rem; color:#666;">Use the Extract button to automatically fill in the title, ingredients and steps from the URL.</small>
-          </div>
-          <div class="form-group">
-            <label for="recipe-title">Recipe Title</label>
-            <input type="text" id="recipe-title" name="title" placeholder="Chocolate Cake" required />
-          </div>
-          <div class="form-group">
-            <label for="recipe-ingredients">Ingredients (one per line)</label>
-            <textarea id="recipe-ingredients" name="ingredients" placeholder="e.g. 1 cup flour\n2 eggs\n1/2 cup sugar" required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="recipe-steps">Steps (summary of instructions)</label>
-            <textarea id="recipe-steps" name="steps" placeholder="Summarize the cooking process here..." required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="recipe-tags">Tags (comma separated)</label>
-            <input type="text" id="recipe-tags" name="tags" placeholder="dessert, easy, chocolate" />
-          </div>
-          <div class="form-group">
-            <label for="recipe-image">Recipe Image (optional)</label>
-            <input type="file" id="recipe-image" name="image" accept="image/*" />
-          </div>
-          <button type="submit" class="btn">Add Recipe</button>
-        </form>
-      </section>
-    </main>
-    <script src="script.js"></script>
-  </body>
+      <ul class="nav-links">
+        <li><a href="add.html" id="nav-add" class="active">Add Recipe</a></li>
+        <li><a href="view.html" id="nav-view">View Recipes</a></li>
+      </ul>
+      <div class="user-menu" id="user-menu">
+        <!-- Populated by script.js -->
+      </div>
+    </nav>
+  </header>
+  <main class="content-container">
+    <h1 class="page-title">Add a New Recipe</h1>
+    <form id="add-recipe-form" class="recipe-form">
+      <label for="recipe-url">Recipe URL</label>
+      <div class="url-input-row">
+      <input type="url" id="recipe-url" placeholder="Enter recipe URL">
+        <button type="button" id="extract-btn" class="btn-secondary">Extract</button>
+      </div>
+      <label for="recipe-title">Title</label>
+      <input type="text" id="recipe-title" placeholder="Recipe title" required>
+      <label for="recipe-source">Source</label>
+      <input type="text" id="recipe-source" placeholder="Source (e.g. YouTube, Allrecipes)" readonly>
+      <label for="recipe-date">Date Added</label>
+      <input type="text" id="recipe-date" placeholder="Date" readonly>
+      <label for="recipe-ingredients">Ingredients (one per line)</label>
+      <textarea id="recipe-ingredients" rows="5" placeholder="e.g., 1 cup flour&#10;2 eggs"></textarea>
+      <label for="recipe-steps">Steps</label>
+      <textarea id="recipe-steps" rows="5" placeholder="Summarize the steps"></textarea>
+      <label for="recipe-tags">Tags (comma separated)</label>
+      <input type="text" id="recipe-tags" placeholder="e.g., dessert, breakfast">
+      <label for="recipe-image">Recipe Image (optional)</label>
+      <input type="file" id="recipe-image" accept="image/*">
+      <button type="submit" class="btn-primary">Save Recipe</button>
+    </form>
+  </main>
+</body>
 </html>
