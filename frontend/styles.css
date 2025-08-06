@@ -15,6 +15,9 @@ body {
   font-family: 'Segoe UI', Tahoma, sans-serif;
   background-color: var(--light);
   color: var(--dark);
+  /* Limit overall page width and center content */
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
 /* Navigation bar */
@@ -41,6 +44,12 @@ body {
   width: 32px;
   height: 32px;
   margin-right: 0.5rem;
+  /* Display the logo on a colored square and invert its colors */
+  background-color: var(--primary);
+  padding: 4px;
+  border-radius: 4px;
+  /* Invert the colors of the PNG so it appears white */
+  filter: brightness(0) invert(1);
 }
 
 .nav-links {
@@ -147,7 +156,8 @@ body {
 /* Right side of hero: image */
 .hero-right {
   flex: 1;
-  background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80');
+  /* Use local hero image for better performance */
+  background-image: url('hero.jpg');
   background-size: cover;
   background-position: center;
 }
@@ -332,8 +342,9 @@ body {
 
 .tag {
   display: inline-block;
-  background-color: var(--accent);
-  color: var(--light);
+  /* Use secondary colour for tags */
+  background-color: var(--secondary);
+  color: var(--dark);
   padding: 0.2rem 0.5rem;
   border-radius: 3px;
   margin-right: 0.25rem;
@@ -374,6 +385,9 @@ body {
   font-size: 0.9rem;
   font-weight: 500;
   transition: background-color 0.2s ease;
+  /* Make all action buttons uniform in size */
+  flex: 1 0 0;
+  min-width: 90px;
 }
 .view-btn {
   background-color: var(--primary);
@@ -452,6 +466,7 @@ body {
 .filter-row {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
@@ -460,6 +475,16 @@ body {
   padding: 0.5rem;
   border: 1px solid var(--secondary);
   border-radius: 4px;
+  height: 2.5rem;
+}
+
+/* Style the clear filter button to align with the input */
+#clear-filter {
+  height: 2.5rem;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Responsive styles */

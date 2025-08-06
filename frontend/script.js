@@ -212,6 +212,7 @@
       return;
     }
     // Determine backend URL. Replace localhost with your deployed backend when needed.
+    // Use deployed backend on Render. If running locally, you may adjust this URL.
     const backendUrl = 'https://cocinando.onrender.com/extract';
     fetch(backendUrl, {
       method: 'POST',
