@@ -387,7 +387,7 @@
       // View details button
       const viewBtn = document.createElement('button');
       viewBtn.className = 'view-btn';
-      viewBtn.textContent = 'View Details';
+      viewBtn.textContent = 'View';
       actionContainer.appendChild(viewBtn);
       // Edit button
       const editBtn = document.createElement('button');
@@ -451,7 +451,7 @@
       viewBtn.addEventListener('click', function () {
         const isVisible = details.style.display === 'block';
         details.style.display = isVisible ? 'none' : 'block';
-        viewBtn.textContent = isVisible ? 'View Details' : 'Hide Details';
+        viewBtn.textContent = isVisible ? 'View' : 'Hide';
       });
       // Edit handler
       editBtn.addEventListener('click', function () {

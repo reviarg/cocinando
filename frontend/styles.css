@@ -44,12 +44,11 @@ body {
   width: 32px;
   height: 32px;
   margin-right: 0.5rem;
-  /* Display the logo on a colored square and invert its colors */
-  background-color: var(--primary);
-  padding: 4px;
-  border-radius: 4px;
-  /* Invert the colors of the PNG so it appears white */
-  filter: brightness(0) invert(1);
+  /* Ensure the logo displays its original colours; no inversion */
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  filter: none;
 }
 
 .nav-links {
@@ -469,7 +468,8 @@ body {
 
 /* Style the clear filter button to align with the input */
 #clear-filter {
-  height: 2rem;
+  /* Increase clear button height per latest instructions */
+  height: 50px;
   padding: 0 1rem;
   display: flex;
   align-items: center;
