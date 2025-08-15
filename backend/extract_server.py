@@ -64,64 +64,107 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
             resp.raise_for_status()
             soup = BeautifulSoup(resp.text, 'html.parser')
             result = {}
-            # Title extraction
-            title_tag = soup.find('h1') or soup.find('title')
-            if title_tag:
-                result['title'] = title_tag.get_text(strip=True)
-            # Ingredients extraction – look for common patterns.  Many sites use
-            # ``ul``/``ol`` lists or ``div`` containers with ``ingredient`` in the
-            # class or id.  When gathering text, include a space separator to
-            # preserve spacing between quantity and ingredient name (e.g. "2 large
-            # eggs" instead of "2largeeggs").
-            ingredients = []
-            # First, search within elements whose class or id mentions
-            # "ingredient" or "ingredients".  This catches recipes where the
-            # ingredients are wrapped in a container.
-            for container in soup.find_all(True, attrs={
-                'class': lambda x: x and 'ingredient' in ' '.join(x).lower(),
-                'id': lambda x: x and 'ingredient' in x.lower()
-            }):
-                for li in container.find_all(['li', 'p']):
-                    text = li.get_text(separator=' ', strip=True)
-                    if text:
-                        ingredients.append(text)
-            # If we didn't find ingredients in specific containers, fall back to
-            # any ``ul`` or ``ol`` that has "ingredient" in its class name.
-            if not ingredients:
-                for lst in soup.find_all(['ul', 'ol']):
-                    classes = ' '.join(lst.get('class', [])).lower()
-                    if 'ingredient' in classes:
-                        for li in lst.find_all('li'):
-                            text = li.get_text(separator=' ', strip=True)
-                            if text:
-                                ingredients.append(text)
-            if ingredients:
-                result['ingredients'] = ingredients
-            # Steps extraction – look for containers with "instruction", "direction"
-            # or "step" in the class or id.  Use a space separator to preserve
-            # spacing within the instructions.  If none are found, fall back to
-            # ordered lists without class filtering.
-            steps = []
-            for container in soup.find_all(True, attrs={
-                'class': lambda x: x and any(k in ' '.join(x).lower() for k in ['instruction', 'direction', 'step']),
-                'id': lambda x: x and any(k in x.lower() for k in ['instruction', 'direction', 'step'])
-            }):
-                for li in container.find_all(['li', 'p']):
-                    text = li.get_text(separator=' ', strip=True)
-                    if text:
-                        steps.append(text)
-            # Fallback: if no steps found, include the first ordered list on the page
-            if not steps:
-                for ol in soup.find_all('ol'):
-                    for li in ol.find_all('li'):
+            # Attempt to parse structured recipe metadata (JSON‑LD)
+            try:
+                for script in soup.find_all('script', type=lambda t: t and 'ld+json' in t):
+                    try:
+                        data = json.loads(script.string or '')
+                    except Exception:
+                        continue
+                    # JSON‑LD can be a list or a dict
+                    entries = data if isinstance(data, list) else [data]
+                    for entry in entries:
+                        if isinstance(entry, dict) and entry.get('@type') == 'Recipe':
+                            # Title
+                            if not result.get('title') and entry.get('name'):
+                                result['title'] = entry['name']
+                            # Ingredients from structured data
+                            if entry.get('recipeIngredient'):
+                                result['ingredients'] = [i.strip() for i in entry['recipeIngredient'] if i.strip()]
+                            # Instructions from structured data
+                            if entry.get('recipeInstructions'):
+                                inst = entry['recipeInstructions']
+                                steps = []
+                                if isinstance(inst, list):
+                                    for step in inst:
+                                        if isinstance(step, dict) and step.get('text'):
+                                            steps.append(step['text'].strip())
+                                        elif isinstance(step, str):
+                                            steps.append(step.strip())
+                                elif isinstance(inst, str):
+                                    # Sometimes instructions are provided as a single string with line breaks
+                                    steps = [s.strip() for s in inst.split('\n') if s.strip()]
+                                if steps:
+                                    result['steps'] = steps
+                            # Break after first recipe entry
+                            break
+                    if result.get('ingredients') or result.get('steps'):
+                        break
+            except Exception:
+                pass
+            # Fallback: Title extraction from page
+            if not result.get('title'):
+                title_tag = soup.find('h1') or soup.find('title')
+                if title_tag:
+                    result['title'] = title_tag.get_text(strip=True)
+            # Fallback: Ingredients extraction – search for lists or containers
+            if not result.get('ingredients'):
+                ingredients = []
+                for container in soup.find_all(True, attrs={
+                    'class': lambda x: x and 'ingredient' in ' '.join(x).lower(),
+                    'id': lambda x: x and 'ingredient' in x.lower()
+                }):
+                    # Skip comment or review sections
+                    if any(word in ' '.join(container.get('class', [])).lower() for word in ['comment', 'review']):
+                        continue
+                    if container.get('id') and any(word in container.get('id').lower() for word in ['comment', 'review']):
+                        continue
+                    for li in container.find_all(['li', 'p']):
+                        text = li.get_text(separator=' ', strip=True)
+                        if text:
+                            ingredients.append(text)
+                if not ingredients:
+                    for lst in soup.find_all(['ul', 'ol']):
+                        classes = ' '.join(lst.get('class', [])).lower()
+                        if 'ingredient' in classes:
+                            for li in lst.find_all('li'):
+                                text = li.get_text(separator=' ', strip=True)
+                                if text:
+                                    ingredients.append(text)
+                    
+                if ingredients:
+                    result['ingredients'] = ingredients
+            # Fallback: Steps extraction – search for instruction containers
+            if not result.get('steps'):
+                steps = []
+                for container in soup.find_all(True, attrs={
+                    'class': lambda x: x and any(k in ' '.join(x).lower() for k in ['instruction', 'direction', 'step']),
+                    'id': lambda x: x and any(k in x.lower() for k in ['instruction', 'direction', 'step'])
+                }):
+                    # Skip comment or review sections
+                    if any(word in ' '.join(container.get('class', [])).lower() for word in ['comment', 'review']):
+                        continue
+                    if container.get('id') and any(word in container.get('id').lower() for word in ['comment', 'review']):
+                        continue
+                    for li in container.find_all(['li', 'p']):
                         text = li.get_text(separator=' ', strip=True)
                         if text:
                             steps.append(text)
-                    # Only take the first ``ol`` as a reasonable set of steps
-                    if steps:
-                        break
-            if steps:
-                result['steps'] = steps
+                # Fallback: first ordered list on the page
+                if not steps:
+                    for ol in soup.find_all('ol'):
+                        # avoid picking up comment lists
+                        parent_classes = ' '.join(ol.parent.get('class', [])).lower() if ol.parent else ''
+                        if 'comment' in parent_classes or 'review' in parent_classes:
+                            continue
+                        for li in ol.find_all('li'):
+                            text = li.get_text(separator=' ', strip=True)
+                            if text:
+                                steps.append(text)
+                        if steps:
+                            break
+                if steps:
+                    result['steps'] = steps
             # Links extraction
             links = []
             for a in soup.find_all('a', href=True):
