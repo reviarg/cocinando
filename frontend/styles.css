@@ -12,7 +12,7 @@
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-family: 'Poppins', sans-serif;
   background-color: var(--light);
   color: var(--dark);
   /* Limit overall page width and center content */
