@@ -130,19 +130,23 @@ body {
 /* Overlay panel containing headline, subtitle and buttons */
 .hero-overlay {
   position: absolute;
-  top: 50%;
-  left: 5%;
-  transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.85);
+  /* removed initial positioning, see below for final positioning */
+  /* Transparent background so the underlying image shows through */
+  background-color: rgba(255, 255, 255, 0);
   padding: 2rem;
   border-radius: 8px;
-  max-width: 45%;
+  max-width: 60%;
+  /* Position overlay in the lower half and center horizontally */
+  top: 65%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 .hero-overlay h1 {
   font-size: 3rem;
   margin: 0 0 1rem;
   line-height: 1.2;
-  color: var(--dark);
+  /* Use light text over dark image */
+  color: var(--neutral);
 }
 .hero-overlay .primary-text {
   color: var(--primary);
@@ -150,7 +154,7 @@ body {
 .hero-overlay p {
   font-size: 1.2rem;
   margin: 0 0 2rem;
-  color: var(--dark);
+  color: var(--neutral);
 }
 .hero-overlay .hero-buttons {
   display: flex;
@@ -370,8 +374,9 @@ body {
   font-weight: 500;
   transition: background-color 0.2s ease;
   /* Make all action buttons uniform in size and reduce their width */
-  flex: 0 0 calc(33.333% - 0.5rem);
-  min-width: unset;
+  flex: 0 0 auto;
+  width: 90px;
+  height: 2rem;
 }
 .view-btn {
   background-color: var(--primary);
@@ -382,7 +387,7 @@ body {
   color: var(--light);
 }
 .delete-btn {
-  background-color: var(--secondary);
+  background-color: #E34653;
   color: var(--light);
 }
 .view-btn:hover {
@@ -459,12 +464,12 @@ body {
   padding: 0.5rem;
   border: 1px solid var(--secondary);
   border-radius: 4px;
-  height: 2.5rem;
+  height: 2rem;
 }
 
 /* Style the clear filter button to align with the input */
 #clear-filter {
-  height: 2.5rem;
+  height: 2rem;
   padding: 0 1rem;
   display: flex;
   align-items: center;
