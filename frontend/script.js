@@ -187,6 +187,10 @@
         document.getElementById('recipe-ingredients').value = (recipe.ingredients || []).join('\n');
         document.getElementById('recipe-steps').value = (recipe.steps || []).join('\n');
         document.getElementById('recipe-tags').value = (recipe.tags || []).join(', ');
+        // Preserve existing image via hidden field
+        if (recipe.image) {
+          document.getElementById('extracted-image').value = recipe.image;
+        }
         // We cannot prefill the image file input; skip.
       }
     }
@@ -230,6 +234,11 @@
         if (Array.isArray(data.steps)) {
           document.getElementById('recipe-steps').value = data.steps.join('\n');
         }
+        if (data.image) {
+          document.getElementById('extracted-image').value = data.image;
+        } else {
+          document.getElementById('extracted-image').value = '';
+        }
       })
       .catch(() => {
         alert('Extraction failed. Please check the URL or try again later.');
@@ -250,6 +259,7 @@
     // Handle image upload
     const imageInput = document.getElementById('recipe-image');
     const file = imageInput.files[0];
+    const extractedImage = document.getElementById('extracted-image').value.trim();
     // Build recipe object and then store after reading image if needed
     const finalizeSave = (imageData) => {
       const recipe = {
@@ -261,7 +271,7 @@
         ingredients,
         steps,
         tags,
-        image: imageData || null
+        image: imageData || extractedImage || null
       };
       const key = `recipes_${currentUser}`;
       const recipes = JSON.parse(localStorage.getItem(key) || '[]');
@@ -292,6 +302,7 @@
       // Reset form
       document.getElementById('add-recipe-form').reset();
       document.getElementById('recipe-source').value = '';
+      document.getElementById('extracted-image').value = '';
       document.getElementById('recipe-date').value = new Date().toLocaleDateString();
     };
     if (file) {

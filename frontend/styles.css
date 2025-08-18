@@ -272,8 +272,7 @@ body {
 .btn-primary,
 .btn-secondary,
 .auth-form button,
-#clear-filter,
-.view-btn {
+#clear-filter {
   display: inline-block;
   padding: 0.5rem 1rem;
   border: none;
@@ -282,6 +281,16 @@ body {
   font-size: 1rem;
   font-weight: 500;
   margin-top: 1rem;
+}
+
+.view-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .btn-primary,
@@ -360,12 +369,11 @@ body {
 .recipe-actions {
   margin-top: 0.5rem;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.5rem;
 }
 /* Buttons inside recipe actions */
 .recipe-actions button {
-  padding: 0.4rem 0.8rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -377,6 +385,7 @@ body {
   width: 100px;
   height: 40px;
   padding: 0.4rem 0.5rem;
+  margin-top: 0;
 }
 .view-btn {
   background-color: var(--primary);
@@ -465,13 +474,12 @@ body {
   border: 1px solid var(--secondary);
   border-radius: 4px;
   /* Match the height of the clear button for alignment */
-  height: 50px;
+  height: 40px;
 }
 
 /* Style the clear filter button to align with the input */
 #clear-filter {
-  /* Increase clear button height per latest instructions */
-  height: 50px;
+  height: 40px;
   padding: 0 1rem;
   display: flex;
   align-items: center;
