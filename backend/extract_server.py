@@ -96,6 +96,19 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
                                     steps = [s.strip() for s in inst.split('\n') if s.strip()]
                                 if steps:
                                     result['steps'] = steps
+                            # Image from structured data
+                            if not result.get('image') and entry.get('image'):
+                                img = entry['image']
+                                if isinstance(img, dict) and img.get('url'):
+                                    result['image'] = img['url']
+                                elif isinstance(img, list) and img:
+                                    first = img[0]
+                                    if isinstance(first, str):
+                                        result['image'] = first
+                                    elif isinstance(first, dict) and first.get('url'):
+                                        result['image'] = first['url']
+                                elif isinstance(img, str):
+                                    result['image'] = img
                             # Break after first recipe entry
                             break
                     if result.get('ingredients') or result.get('steps'):
@@ -134,37 +147,76 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
                     
                 if ingredients:
                     result['ingredients'] = ingredients
-            # Fallback: Steps extraction – search for instruction containers
+            # Fallback: Steps extraction – look for headings like "Instructions" or "Process"
             if not result.get('steps'):
                 steps = []
-                for container in soup.find_all(True, attrs={
-                    'class': lambda x: x and any(k in ' '.join(x).lower() for k in ['instruction', 'direction', 'step']),
-                    'id': lambda x: x and any(k in x.lower() for k in ['instruction', 'direction', 'step'])
-                }):
-                    # Skip comment or review sections
-                    if any(word in ' '.join(container.get('class', [])).lower() for word in ['comment', 'review']):
-                        continue
-                    if container.get('id') and any(word in container.get('id').lower() for word in ['comment', 'review']):
-                        continue
-                    for li in container.find_all(['li', 'p']):
-                        text = li.get_text(separator=' ', strip=True)
-                        if text:
-                            steps.append(text)
-                # Fallback: first ordered list on the page
+                keywords = ['instruction', 'direction', 'step', 'method', 'preparation', 'process']
+                for heading in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
+                    text = heading.get_text(separator=' ', strip=True).lower()
+                    if any(k in text for k in keywords):
+                        for sib in heading.find_next_siblings():
+                            if sib.name and sib.name.startswith('h'):
+                                break
+                            if sib.name in ['ol', 'ul']:
+                                for li in sib.find_all('li'):
+                                    t = li.get_text(separator=' ', strip=True)
+                                    if t:
+                                        steps.append(t)
+                                continue
+                            if sib.name == 'p':
+                                t = sib.get_text(separator=' ', strip=True)
+                                if t:
+                                    steps.append(t)
+                                continue
+                            for li in sib.find_all(['li', 'p']):
+                                t = li.get_text(separator=' ', strip=True)
+                                if t:
+                                    steps.append(t)
+                        if steps:
+                            break
                 if not steps:
+                    for container in soup.find_all(True, attrs={
+                        'class': lambda x: x and any(k in ' '.join(x).lower() for k in ['instruction', 'direction', 'step']),
+                        'id': lambda x: x and any(k in x.lower() for k in ['instruction', 'direction', 'step'])
+                    }):
+                        # Skip comment or review sections
+                        if any(word in ' '.join(container.get('class', [])).lower() for word in ['comment', 'review']):
+                            continue
+                        if container.get('id') and any(word in container.get('id').lower() for word in ['comment', 'review']):
+                            continue
+                        for li in container.find_all(['li', 'p']):
+                            t = li.get_text(separator=' ', strip=True)
+                            if t:
+                                steps.append(t)
+                if not steps:
+                    # Fallback: first ordered list on the page
                     for ol in soup.find_all('ol'):
-                        # avoid picking up comment lists
                         parent_classes = ' '.join(ol.parent.get('class', [])).lower() if ol.parent else ''
                         if 'comment' in parent_classes or 'review' in parent_classes:
                             continue
                         for li in ol.find_all('li'):
-                            text = li.get_text(separator=' ', strip=True)
-                            if text:
-                                steps.append(text)
+                            t = li.get_text(separator=' ', strip=True)
+                            if t:
+                                steps.append(t)
                         if steps:
                             break
                 if steps:
                     result['steps'] = steps
+            # Fallback: Image extraction
+            if not result.get('image'):
+                meta = soup.find('meta', property='og:image') or soup.find('meta', attrs={'name': 'og:image'})
+                if meta and meta.get('content'):
+                    result['image'] = meta['content']
+            if not result.get('image'):
+                for img in soup.find_all('img', src=True):
+                    src = img['src']
+                    if src.startswith('data:'):
+                        continue
+                    alt = (img.get('alt') or '').lower()
+                    if any(k in alt for k in ['logo', 'icon', 'avatar']):
+                        continue
+                    result['image'] = src
+                    break
             # Links extraction
             links = []
             for a in soup.find_all('a', href=True):
