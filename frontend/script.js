@@ -82,11 +82,17 @@
         }
       });
     } else {
-      // Not logged in: show sign-in link
+      // Not logged in: show sign-in and sign-up links
       const signInLink = document.createElement('a');
       signInLink.href = 'login.html';
       signInLink.textContent = 'Sign in';
+      const separator = document.createTextNode(' / ');
+      const signUpLink = document.createElement('a');
+      signUpLink.href = 'signup.html';
+      signUpLink.textContent = 'Sign up';
       userMenu.appendChild(signInLink);
+      userMenu.appendChild(separator);
+      userMenu.appendChild(signUpLink);
     }
   }
 
@@ -209,7 +215,9 @@
     }
     // Extract button handler
     const extractBtn = document.getElementById('extract-btn');
-    extractBtn.addEventListener('click', handleExtraction);
+    if (extractBtn) {
+      extractBtn.addEventListener('click', handleExtraction);
+    }
     // Form submission
     const form = document.getElementById('add-recipe-form');
     form.addEventListener('submit', function (e) {
@@ -261,10 +269,11 @@
           steps: Array.isArray(data.steps) ? data.steps : []
         });
       })
-      .catch(() => {
-        alert('Extraction failed. Please check the URL or try again later.');
-      });
-  }
+        .catch(err => {
+          console.error('Extraction failed:', err);
+          alert('Extraction failed. Please check the URL or try again later.');
+        });
+    }
 
   /**
    * Generate simple tag suggestions from recipe content.
