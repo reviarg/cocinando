@@ -227,11 +227,12 @@
       extractBtn.addEventListener('click', handleExtraction);
     }
     // Form submission
-    const form = document.getElementById('add-recipe-form');
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      saveRecipe();
-    });
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        saveRecipe();
+      });
+    }
   }
 
   /**
