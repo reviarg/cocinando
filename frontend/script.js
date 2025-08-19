@@ -11,10 +11,24 @@
    */
   document.addEventListener('DOMContentLoaded', function () {
     renderNav();
-    // Clear any pending edit when navigating to the add recipe page
+    // Intercept navigation to add/view pages to enforce authentication
     document.querySelectorAll('a[href="add.html"]').forEach(link => {
-      link.addEventListener('click', function () {
+      link.addEventListener('click', function (e) {
         localStorage.removeItem('editRecipeId');
+        if (!localStorage.getItem('currentUser')) {
+          e.preventDefault();
+          localStorage.setItem('redirectAfterLogin', 'add.html');
+          window.location.href = 'login.html';
+        }
+      });
+    });
+    document.querySelectorAll('a[href="view.html"]').forEach(link => {
+      link.addEventListener('click', function (e) {
+        if (!localStorage.getItem('currentUser')) {
+          e.preventDefault();
+          localStorage.setItem('redirectAfterLogin', 'view.html');
+          window.location.href = 'login.html';
+        }
       });
     });
     const page = document.body.dataset.page;
@@ -82,11 +96,11 @@
         }
       });
     } else {
-      // Not logged in: show sign-in link
-      const signInLink = document.createElement('a');
-      signInLink.href = 'login.html';
-      signInLink.textContent = 'Sign in';
-      userMenu.appendChild(signInLink);
+      // Not logged in: show sign-up link
+      const signUpLink = document.createElement('a');
+      signUpLink.href = 'signup.html';
+      signUpLink.textContent = 'Sign up';
+      userMenu.appendChild(signUpLink);
     }
   }
 
@@ -209,7 +223,9 @@
     }
     // Extract button handler
     const extractBtn = document.getElementById('extract-btn');
-    extractBtn.addEventListener('click', handleExtraction);
+    if (extractBtn) {
+      extractBtn.addEventListener('click', handleExtraction);
+    }
     // Form submission
     const form = document.getElementById('add-recipe-form');
     form.addEventListener('submit', function (e) {
@@ -228,9 +244,11 @@
       alert('Please enter a recipe URL to extract.');
       return;
     }
-    // Determine backend URL. Replace localhost with your deployed backend when needed.
-    // Use deployed backend on Render. If running locally, you may adjust this URL.
-    const backendUrl = 'https://cocinando.onrender.com/extract';
+    // Determine backend URL.
+    const host = window.location.hostname;
+    const backendUrl = ['localhost', '127.0.0.1'].includes(host)
+      ? 'http://localhost:5000/extract'
+      : 'https://cocinando.onrender.com/extract';
     fetch(backendUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -259,10 +277,11 @@
           steps: Array.isArray(data.steps) ? data.steps : []
         });
       })
-      .catch(() => {
-        alert('Extraction failed. Please check the URL or try again later.');
-      });
-  }
+        .catch(err => {
+          console.error('Extraction failed:', err);
+          alert('Extraction failed. Please check the URL or try again later.');
+        });
+    }
 
   /**
    * Generate simple tag suggestions from recipe content.
