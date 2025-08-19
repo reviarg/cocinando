@@ -123,14 +123,15 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
             # Fallback: Ingredients extraction – search for lists or containers
             if not result.get('ingredients'):
                 ingredients = []
-                for container in soup.find_all(True, attrs={
-                    'class': lambda x: x and 'ingredient' in ' '.join(x).lower(),
-                    'id': lambda x: x and 'ingredient' in x.lower()
-                }):
-                    # Skip comment or review sections
-                    if any(word in ' '.join(container.get('class', [])).lower() for word in ['comment', 'review']):
+                for container in soup.find_all(True):
+                    classes = ' '.join(container.get('class', [])).lower()
+                    cid = (container.get('id') or '').lower()
+                    if 'ingredient' not in classes and 'ingredient' not in cid:
                         continue
-                    if container.get('id') and any(word in container.get('id').lower() for word in ['comment', 'review']):
+                    # Skip comment or review sections
+                    if any(word in classes for word in ['comment', 'review']):
+                        continue
+                    if any(word in cid for word in ['comment', 'review']):
                         continue
                     for li in container.find_all(['li', 'p']):
                         text = li.get_text(separator=' ', strip=True)
@@ -144,7 +145,7 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
                                 text = li.get_text(separator=' ', strip=True)
                                 if text:
                                     ingredients.append(text)
-                    
+
                 if ingredients:
                     result['ingredients'] = ingredients
             # Fallback: Steps extraction – look for headings like "Instructions" or "Process"
@@ -175,14 +176,17 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
                         if steps:
                             break
                 if not steps:
-                    for container in soup.find_all(True, attrs={
-                        'class': lambda x: x and any(k in ' '.join(x).lower() for k in ['instruction', 'direction', 'step']),
-                        'id': lambda x: x and any(k in x.lower() for k in ['instruction', 'direction', 'step'])
-                    }):
-                        # Skip comment or review sections
-                        if any(word in ' '.join(container.get('class', [])).lower() for word in ['comment', 'review']):
+                    for container in soup.find_all(True):
+                        classes = ' '.join(container.get('class', [])).lower()
+                        cid = (container.get('id') or '').lower()
+                        if not any(k in classes for k in ['instruction', 'direction', 'step']) and not any(
+                            k in cid for k in ['instruction', 'direction', 'step']
+                        ):
                             continue
-                        if container.get('id') and any(word in container.get('id').lower() for word in ['comment', 'review']):
+                        # Skip comment or review sections
+                        if any(word in classes for word in ['comment', 'review']):
+                            continue
+                        if any(word in cid for word in ['comment', 'review']):
                             continue
                         for li in container.find_all(['li', 'p']):
                             t = li.get_text(separator=' ', strip=True)
