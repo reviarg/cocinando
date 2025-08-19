@@ -11,6 +11,12 @@
    */
   document.addEventListener('DOMContentLoaded', function () {
     renderNav();
+    // Clear any pending edit when navigating to the add recipe page
+    document.querySelectorAll('a[href="add.html"]').forEach(link => {
+      link.addEventListener('click', function () {
+        localStorage.removeItem('editRecipeId');
+      });
+    });
     const page = document.body.dataset.page;
     switch (page) {
       case 'home':
@@ -164,6 +170,13 @@
       window.location.href = 'login.html';
       return;
     }
+    // Always start with a clean form
+    const form = document.getElementById('add-recipe-form');
+    if (form) {
+      form.reset();
+      document.getElementById('recipe-source').value = '';
+      document.getElementById('extracted-image').value = '';
+    }
     // Determine if editing an existing recipe
     const editId = localStorage.getItem('editRecipeId');
     const pageTitle = document.querySelector('.page-title');
@@ -239,10 +252,51 @@
         } else {
           document.getElementById('extracted-image').value = '';
         }
+        // Suggest tags based on extracted data
+        suggestTags({
+          title: data.title || '',
+          ingredients: Array.isArray(data.ingredients) ? data.ingredients : [],
+          steps: Array.isArray(data.steps) ? data.steps : []
+        });
       })
       .catch(() => {
         alert('Extraction failed. Please check the URL or try again later.');
       });
+  }
+
+  /**
+   * Generate simple tag suggestions from recipe content.
+   */
+  function suggestTags(data) {
+    const field = document.getElementById('recipe-tags');
+    if (!field) return;
+    const text = `${data.title} ${data.ingredients.join(' ')} ${data.steps.join(' ')}`.toLowerCase();
+    const suggestions = [];
+    const cuisines = ['italian', 'mexican', 'chinese', 'indian', 'thai', 'french', 'japanese', 'spanish', 'greek', 'mediterranean', 'american'];
+    const proteins = ['chicken', 'beef', 'pork', 'lamb', 'turkey', 'fish', 'salmon', 'shrimp', 'tofu', 'egg'];
+    const types = ['dessert', 'soup', 'salad', 'bread', 'cake', 'cookie', 'pasta', 'sandwich', 'stew', 'curry'];
+    const addSuggestions = list => {
+      list.forEach(item => {
+        if (text.includes(item) && suggestions.length < 3 && !suggestions.includes(item)) {
+          suggestions.push(item);
+        }
+      });
+    };
+    addSuggestions(cuisines);
+    addSuggestions(proteins);
+    addSuggestions(types);
+    if (!suggestions.length) return;
+    if (field.value.trim()) {
+      const existing = field.value.split(',').map(t => t.trim()).filter(Boolean);
+      suggestions.forEach(tag => {
+        if (!existing.map(e => e.toLowerCase()).includes(tag)) {
+          existing.push(tag);
+        }
+      });
+      field.value = existing.slice(0, 3).join(', ');
+    } else {
+      field.value = suggestions.slice(0, 3).join(', ');
+    }
   }
 
   /**

@@ -260,12 +260,16 @@ body {
 
 .url-input-row {
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
 .url-input-row input {
   flex: 1;
   margin-right: 0.5rem;
+}
+
+.url-input-row button {
+  height: 100%;
 }
 
 /* Buttons */
@@ -371,6 +375,7 @@ body {
   display: flex;
   flex-wrap: nowrap;
   gap: 0.5rem;
+  justify-content: flex-end;
 }
 /* Buttons inside recipe actions */
 .recipe-actions button {
