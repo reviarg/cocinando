@@ -96,15 +96,7 @@
         }
       });
     } else {
-      // Not logged in: offer sign-in and sign-up links
-      const signInLink = document.createElement('a');
-      signInLink.href = 'login.html';
-      signInLink.textContent = 'Sign in';
-      userMenu.appendChild(signInLink);
-
-      // Separator for readability
-      userMenu.appendChild(document.createTextNode(' / '));
-
+      // Not logged in: show sign-up link
       const signUpLink = document.createElement('a');
       signUpLink.href = 'signup.html';
       signUpLink.textContent = 'Sign up';
@@ -253,9 +245,9 @@
       alert('Please enter a recipe URL to extract.');
       return;
     }
-    // Determine backend URL.
-    const host = window.location.hostname;
-    const backendUrl = ['localhost', '127.0.0.1'].includes(host)
+    // Determine backend URL. Replace localhost with your deployed backend when needed.
+    // Use deployed backend on Render. If running locally, you may adjust this URL.
+    const backendUrl = window.location.hostname === 'localhost'
       ? 'http://localhost:5000/extract'
       : 'https://cocinando.onrender.com/extract';
     fetch(backendUrl, {
