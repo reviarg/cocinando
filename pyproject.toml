@@ -1,0 +1,16 @@
+[project]
+name = "cocinando-life"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "beautifulsoup4>=4.14.3",
+    "flask>=3.1.3",
+    "requests>=2.32.5",
+]
+
+[tool.uv.workspace]
+members = [
+    "recipe_site_final_updated8",
+]

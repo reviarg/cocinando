@@ -1,0 +1,500 @@
+/* Global styles and color palette */
+:root {
+  /* Updated color palette inspired by the provided design */
+  /* Updated palette per latest instructions */
+  --dark: #181818;      /* very dark for text */
+  --primary: #FF9F0C;   /* vibrant orange for highlights */
+  --secondary: #D3CAC0; /* soft beige for secondary elements */
+  --light: #F6F6F6;     /* light grey for backgrounds */
+  --neutral: #FFFEFC;   /* off white for cards */
+  --accent: #FF9F0C;    /* reuse primary as accent */
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--light);
+  color: var(--dark);
+  /* Limit overall page width and center content */
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Navigation bar */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background-color: var(--neutral);
+  color: var(--dark);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-left .brand {
+  display: flex;
+  align-items: center;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--dark);
+  text-decoration: none;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 0.5rem;
+  /* Ensure the logo displays its original colours; no inversion */
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  filter: none;
+}
+
+.nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.nav-links li {
+  margin-left: 1rem;
+}
+
+.nav-links a {
+  color: var(--dark);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  background-color: var(--light);
+  color: var(--primary);
+}
+
+/* User menu (sign in / username) */
+.user-menu {
+  position: relative;
+  color: var(--dark);
+}
+
+.user-menu a {
+  color: var(--dark);
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: var(--light);
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  overflow: hidden;
+  display: none;
+  z-index: 10;
+}
+
+.dropdown a {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: var(--dark);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dropdown a:hover {
+  background-color: var(--primary);
+  color: var(--light);
+}
+
+/* Home hero section with full-width image */
+.home-hero {
+  position: relative;
+  min-height: 70vh;
+}
+/* Hero image fills the entire hero section without cropping */
+.hero-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+/* Overlay panel containing headline, subtitle and buttons */
+.hero-overlay {
+  position: absolute;
+  /* removed initial positioning, see below for final positioning */
+  /* Transparent background so the underlying image shows through */
+  background-color: rgba(255, 255, 255, 0);
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 60%;
+  /* Position overlay in the lower half and center horizontally */
+  top: 65%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.hero-overlay h1 {
+  font-size: 3rem;
+  margin: 0 0 1rem;
+  line-height: 1.2;
+  /* Use light text over dark image */
+  color: var(--neutral);
+}
+.hero-overlay .primary-text {
+  color: var(--primary);
+}
+.hero-overlay p {
+  font-size: 1.2rem;
+  margin: 0 0 2rem;
+  color: var(--neutral);
+}
+.hero-overlay .hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Buttons used in hero */
+.hero-buttons a {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--neutral);
+}
+.btn-primary:hover {
+  background-color: var(--secondary);
+  color: var(--dark);
+}
+.btn-secondary {
+  background-color: var(--dark);
+  color: var(--neutral);
+}
+.btn-secondary:hover {
+  background-color: var(--secondary);
+  color: var(--dark);
+}
+
+/* Features section on home page */
+/* Features strip below hero */
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  background-color: var(--light);
+  padding: 2rem 0;
+}
+.feature {
+  flex: 1;
+  padding: 1rem;
+  text-align: center;
+  min-width: 200px;
+}
+.feature i {
+  font-size: 2rem;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+.feature h3 {
+  margin: 0.5rem 0;
+  font-size: 1.2rem;
+  color: var(--dark);
+}
+.feature p {
+  font-size: 0.9rem;
+  color: var(--dark);
+  max-width: 250px;
+  margin: 0 auto;
+}
+
+/* Content container */
+.content-container {
+  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.page-title {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  color: var(--primary);
+  font-size: 2rem;
+  text-align: center;
+}
+
+/* Forms */
+.recipe-form label {
+  display: block;
+  margin-top: 1rem;
+  color: var(--dark);
+  font-weight: 500;
+}
+
+.recipe-form input[type="text"],
+.recipe-form input[type="url"],
+.recipe-form textarea,
+.recipe-form input[type="file"],
+.auth-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--secondary);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.recipe-form input[readonly] {
+  background-color: #f5f5f5;
+}
+
+.url-input-row {
+  display: flex;
+  align-items: center;
+}
+
+.url-input-row input {
+  flex: 1;
+  margin-right: 0.5rem;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-secondary,
+.auth-form button,
+#clear-filter {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+.view-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.btn-primary,
+.auth-form button {
+  background-color: var(--primary);
+  color: var(--light);
+}
+
+.btn-secondary,
+#clear-filter,
+.view-btn {
+  background-color: var(--accent);
+  color: var(--light);
+}
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.auth-form button:hover,
+#clear-filter:hover,
+.view-btn:hover {
+  opacity: 0.9;
+}
+
+/* Recipe cards */
+.recipes-container {
+  margin-top: 1rem;
+}
+
+.recipe-card {
+  background-color: var(--light);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.recipe-card h3 {
+  margin-top: 0;
+  color: var(--primary);
+}
+
+.recipe-card .tags {
+  margin-top: 0.5rem;
+}
+
+.tag {
+  display: inline-block;
+  /* Use secondary colour for tags */
+  background-color: var(--secondary);
+  color: var(--dark);
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  margin-right: 0.25rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.details {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--accent);
+  display: none;
+}
+
+.details img {
+  max-width: 100%;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.details p {
+  margin: 0.25rem 0;
+}
+
+/* Action buttons container on recipe cards */
+.recipe-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+}
+/* Buttons inside recipe actions */
+.recipe-actions button {
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  /* Make all action buttons uniform in size and reduce their width */
+  flex: 0 0 auto;
+  width: 100px;
+  height: 40px;
+  padding: 0.4rem 0.5rem;
+  margin-top: 0;
+}
+.view-btn {
+  background-color: var(--primary);
+  color: var(--light);
+}
+.edit-btn {
+  background-color: var(--accent);
+  color: var(--light);
+}
+.delete-btn {
+  background-color: #E34653;
+  color: var(--light);
+}
+.view-btn:hover {
+  background-color: var(--secondary);
+}
+.edit-btn:hover {
+  background-color: var(--dark);
+}
+.delete-btn:hover {
+  background-color: var(--dark);
+}
+
+/* Auth forms */
+.auth-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: var(--light);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auth-container h1 {
+  text-align: center;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--secondary);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: var(--primary);
+  color: var(--light);
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.auth-form button:hover {
+  opacity: 0.9;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.auth-switch a {
+  color: var(--secondary);
+  text-decoration: none;
+}
+
+/* Filter row */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+#filter-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--secondary);
+  border-radius: 4px;
+  /* Match the height of the clear button for alignment */
+  height: 40px;
+}
+
+/* Style the clear filter button to align with the input */
+#clear-filter {
+  height: 40px;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 40vh;
+  }
+  .navbar .nav-links {
+    display: none;
+  }
+  .navbar .nav-left {
+    flex: 1;
+  }
+}

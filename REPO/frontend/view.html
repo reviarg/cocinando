@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Recipes - Cocinando.Life</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script defer src="script.js"></script>
+</head>
+<body data-page="view">
+  <header>
+    <nav class="navbar">
+      <div class="nav-left">
+        <a href="index.html" class="brand">
+          <img src="icon.png" alt="Cocinando.Life logo" class="logo">
+          <span>Cocinando.Life</span>
+        </a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="add.html" id="nav-add">Add Recipe</a></li>
+        <li><a href="view.html" id="nav-view" class="active">View Recipes</a></li>
+      </ul>
+      <div class="user-menu" id="user-menu">
+        <!-- Populated by script.js -->
+      </div>
+    </nav>
+  </header>
+  <main class="content-container">
+    <h1 class="page-title">Your Recipes</h1>
+    <div class="filter-row">
+      <input type="text" id="filter-input" placeholder="Filter by title or tag">
+      <button type="button" id="clear-filter" class="btn-secondary">Clear</button>
+    </div>
+    <div id="recipes-container" class="recipes-container">
+      <!-- Recipes will be rendered here -->
+    </div>
+  </main>
+</body>
+</html>
