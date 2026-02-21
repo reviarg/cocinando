@@ -17,6 +17,22 @@ import requests
 from bs4 import BeautifulSoup
 
 
+def _normalize_space(text):
+    return ' '.join((text or '').split())
+
+
+def _unique_preserve_order(items):
+    seen = set()
+    unique = []
+    for item in items:
+        norm = _normalize_space(item).lower()
+        if not norm or norm in seen:
+            continue
+        seen.add(norm)
+        unique.append(_normalize_space(item))
+    return unique
+
+
 class RecipeRequestHandler(BaseHTTPRequestHandler):
     def _set_headers(self, status=200, content_type="application/json"):
         self.send_response(status)
@@ -80,7 +96,9 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
                                 result['title'] = entry['name']
                             # Ingredients from structured data
                             if entry.get('recipeIngredient'):
-                                result['ingredients'] = [i.strip() for i in entry['recipeIngredient'] if i.strip()]
+                                result['ingredients'] = _unique_preserve_order(
+                                    [i.strip() for i in entry['recipeIngredient'] if i.strip()]
+                                )
                             # Instructions from structured data
                             if entry.get('recipeInstructions'):
                                 inst = entry['recipeInstructions']
@@ -95,7 +113,7 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
                                     # Sometimes instructions are provided as a single string with line breaks
                                     steps = [s.strip() for s in inst.split('\n') if s.strip()]
                                 if steps:
-                                    result['steps'] = steps
+                                    result['steps'] = _unique_preserve_order(steps)
                             # Image from structured data
                             if not result.get('image') and entry.get('image'):
                                 img = entry['image']
@@ -128,6 +146,16 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
                     cid = (container.get('id') or '').lower()
                     if 'ingredient' not in classes and 'ingredient' not in cid:
                         continue
+                    # Ignore parent wrappers that contain other ingredient sections.
+                    # Collecting from both parent and child causes full-list duplicates.
+                    if container.find(
+                        lambda tag: tag is not container
+                        and (
+                            'ingredient' in ' '.join(tag.get('class', [])).lower()
+                            or 'ingredient' in (tag.get('id') or '').lower()
+                        )
+                    ):
+                        continue
                     # Skip comment or review sections
                     if any(word in classes for word in ['comment', 'review']):
                         continue
@@ -147,7 +175,7 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
                                     ingredients.append(text)
 
                 if ingredients:
-                    result['ingredients'] = ingredients
+                    result['ingredients'] = _unique_preserve_order(ingredients)
             # Fallback: Steps extraction – look for headings like "Instructions" or "Process"
             if not result.get('steps'):
                 steps = []
@@ -205,7 +233,7 @@ class RecipeRequestHandler(BaseHTTPRequestHandler):
                         if steps:
                             break
                 if steps:
-                    result['steps'] = steps
+                    result['steps'] = _unique_preserve_order(steps)
             # Fallback: Image extraction
             if not result.get('image'):
                 meta = soup.find('meta', property='og:image') or soup.find('meta', attrs={'name': 'og:image'})
