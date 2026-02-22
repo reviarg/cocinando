@@ -30,13 +30,22 @@
   </header>
   <main class="content-container">
     <h1 class="page-title">Your Recipes</h1>
-    <div class="filter-row">
-      <input type="text" id="filter-input" placeholder="Filter by title or tag">
-      <button type="button" id="clear-filter" class="btn-secondary">Clear</button>
+    <div class="view-controls">
+      <button type="button" id="card-view-btn" class="view-toggle-btn active">Card View</button>
+      <button type="button" id="table-view-btn" class="view-toggle-btn">Table View</button>
     </div>
-    <div id="recipes-container" class="recipes-container">
+    <div class="filter-grid">
+      <input type="text" id="filter-id" placeholder="Filter ID">
+      <input type="text" id="filter-date-added" placeholder="Filter Date Added">
+      <input type="text" id="filter-name" placeholder="Filter Recipe Name">
+      <input type="text" id="filter-source" placeholder="Filter Source">
+      <input type="text" id="filter-tags" placeholder="Filter Tags">
+      <button type="button" id="clear-filter" class="btn-secondary">Clear Filters</button>
+    </div>
+    <div id="recipes-container" class="recipes-container card-mode">
       <!-- Recipes will be rendered here -->
     </div>
+    <div id="pagination-controls" class="pagination-controls"></div>
   </main>
 </body>
 </html>
